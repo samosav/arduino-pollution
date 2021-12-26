@@ -1,13 +1,14 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 
-char ssid[] = "TP-Link_92A4";          //  your network SSID (name)
-char pass[] = "FIXME";   // your network password
+char ssid[] = "fixme";          //  your network SSID (name)
+char pass[] = "fixme";          // your network password
+
+int sensorValue;
 
 int status = WL_IDLE_STATUS;
-IPAddress server(192,168,1,142);  
+IPAddress server(192,168,1,69); //use ifconfig to get correct ip
 
-// Initialize the client library
 WiFiClient client;
 
 void setup() {
@@ -20,22 +21,26 @@ void setup() {
   status = WiFi.begin(ssid, pass);
   if ( status != WL_CONNECTED) {
     Serial.println("Couldn't get a wifi connection");
-    // don't do anything else:
     while(true);    
   }
+  
   else {
     Serial.println("Connected to wifi");
-    Serial.println("\nStarting connection...");
-    // if you get a connection, report back via serial:
-    if (client.connect(server, 5000)) {
-      Serial.println("connected");
-      // Make a HTTP request:
-      client.println("GET /update?d=673 HTTP/1.0");
-      client.println();       
-    }
-  }
+  }     
+        
 }
 
 void loop() {
 
+  sensorValue = analogRead(0);
+  Serial.print(sensorValue, DEC); 
+  delay(1000);
+  
+  if (client.connect(server, 5000)) {
+    Serial.println("connected");
+    client.println("GET /update?d="+String(sensorValue)+" HTTP/1.0");
+    client.println();       
+    
+  }    
+  
 }
